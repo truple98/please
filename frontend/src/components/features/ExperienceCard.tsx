@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { Experience } from '@/../../shared/types/experience';
 import { Card } from '@/components/ui/Card';
@@ -6,12 +8,31 @@ import { Button } from '@/components/ui/Button';
 
 interface ExperienceCardProps {
   experience: Experience;
+  initialIsFavorited?: boolean; // 초기 찜 상태 (서버에서 받아올 데이터)
 }
 
-export function ExperienceCard({ experience }: ExperienceCardProps) {
+export function ExperienceCard({ experience, initialIsFavorited = false }: ExperienceCardProps) {
+  const [isFavorited, setIsFavorited] = useState(initialIsFavorited);
+  const [isAnimating, setIsAnimating] = useState(false);
+
   // 기본 fallback 이미지 (안정적인 Unsplash 이미지)
   const fallbackImage = "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
   
+  // 찜하기 토글 함수
+  const handleFavoriteToggle = (e: React.MouseEvent) => {
+    e.preventDefault(); // Link 클릭 방지
+    e.stopPropagation(); // 이벤트 버블링 방지
+    
+    setIsAnimating(true);
+    setIsFavorited(!isFavorited);
+    
+    // 애니메이션 후 상태 리셋
+    setTimeout(() => setIsAnimating(false), 200);
+    
+    // 여기서 실제 API 호출을 할 수 있습니다
+    // favoriteAPI.toggle(experience.id)
+  };
+
   return (
     <Card className="p-0 overflow-hidden group hover:shadow-xl transition-all duration-300 border border-gray-100">
       {/* 이미지 섹션 */}
@@ -31,8 +52,20 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
           </span>
         </div>
         {/* 하트 아이콘 (찜하기) */}
-        <div className="absolute top-3 right-3 w-8 h-8 bg-white bg-opacity-90 backdrop-blur-sm rounded-full flex items-center justify-center transition-all cursor-pointer">
-          <span className="text-gray-600 hover:text-red-500 transition-colors">🤍</span>
+        <div 
+          className={`absolute top-3 right-3 w-8 h-8 bg-white bg-opacity-90 backdrop-blur-sm rounded-full flex items-center justify-center transition-all cursor-pointer hover:scale-110 ${
+            isAnimating ? 'animate-pulse scale-125' : ''
+          } ${isFavorited ? 'shadow-lg' : ''}`}
+          onClick={handleFavoriteToggle}
+          title={isFavorited ? '찜 해제' : '찜하기'}
+        >
+          <span className={`text-lg transition-all duration-200 ${
+            isFavorited 
+              ? 'text-red-500 drop-shadow-sm' 
+              : 'text-gray-400 hover:text-red-400'
+          }`}>
+            {isFavorited ? '❤️' : '🤍'}
+          </span>
         </div>
       </div>
 
@@ -61,6 +94,15 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
             <span className="text-sm font-semibold text-gray-700">{experience.rating}</span>
             <span className="text-sm text-gray-500">({experience.reviewCount})</span>
           </div>
+          {/* 찜 상태 표시 */}
+          {isFavorited && (
+            <div className="ml-auto">
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700">
+                <span className="mr-1">💖</span>
+                찜함
+              </span>
+            </div>
+          )}
         </div>
 
         {/* 가격 및 날짜 */}

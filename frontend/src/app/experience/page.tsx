@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useMemo } from 'react';
 import { ExperienceCard } from '@/components/features/ExperienceCard';
 import { Section } from '@/components/ui/Section';
 import { Button } from '@/components/ui/Button';
@@ -18,7 +20,8 @@ const mockExperiences = [
     date: "2025-02-15",
     host: "여주도자기공방",
     rating: 4.8,
-    reviewCount: 127
+    reviewCount: 127,
+    tags: ["힐링", "혼자", "도자기", "공예"]
   },
   {
     id: "exp002",
@@ -31,7 +34,8 @@ const mockExperiences = [
     date: "2025-02-20",
     host: "평창목공소",
     rating: 4.9,
-    reviewCount: 89
+    reviewCount: 89,
+    tags: ["목공", "창작", "혼자", "집중"]
   },
   {
     id: "exp003",
@@ -44,7 +48,8 @@ const mockExperiences = [
     date: "2025-02-25",
     host: "논산친환경농장",
     rating: 4.7,
-    reviewCount: 156
+    reviewCount: 156,
+    tags: ["자연", "농장", "가족", "교육"]
   },
   {
     id: "exp004",
@@ -57,7 +62,8 @@ const mockExperiences = [
     date: "2025-03-01",
     host: "전주한지공방",
     rating: 4.6,
-    reviewCount: 203
+    reviewCount: 203,
+    tags: ["전통", "한지", "문화", "공예"]
   },
   {
     id: "exp005",
@@ -70,7 +76,8 @@ const mockExperiences = [
     date: "2025-03-05",
     host: "안동산촌마을",
     rating: 4.8,
-    reviewCount: 178
+    reviewCount: 178,
+    tags: ["전통", "문화", "마을", "역사"]
   },
   {
     id: "exp006",
@@ -83,11 +90,85 @@ const mockExperiences = [
     date: "2025-03-10",
     host: "청주천연염색소",
     rating: 4.9,
-    reviewCount: 94
+    reviewCount: 94,
+    tags: ["염색", "자연", "색상", "예술"]
   }
 ];
 
+// 정렬 옵션
+const sortOptions = [
+  { value: 'recommended', label: '추천순' },
+  { value: 'latest', label: '최신순' },
+  { value: 'price_asc', label: '가격 낮은순' },
+  { value: 'price_desc', label: '가격 높은순' },
+  { value: 'rating', label: '평점순' }
+];
+
 export default function ExperiencePage() {
+  // 상태 관리
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState('');
+  const [sortBy, setSortBy] = useState('recommended');
+  const [priceRange, setPriceRange] = useState({ min: '', max: '' });
+
+  // 필터링 및 정렬된 체험 목록
+  const filteredAndSortedExperiences = useMemo(() => {
+    let filtered = mockExperiences.filter((experience) => {
+      // 검색어 필터
+      const matchesSearch = searchTerm === '' || 
+        experience.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        experience.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        experience.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        experience.host.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        experience.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+
+      // 카테고리 필터
+      const matchesCategory = selectedCategory === '' || experience.category === selectedCategory;
+
+      // 지역 필터
+      const matchesLocation = selectedLocation === '' || experience.location.includes(selectedLocation);
+
+      // 가격 범위 필터
+      const matchesPriceMin = priceRange.min === '' || experience.price >= parseInt(priceRange.min);
+      const matchesPriceMax = priceRange.max === '' || experience.price <= parseInt(priceRange.max);
+
+      return matchesSearch && matchesCategory && matchesLocation && matchesPriceMin && matchesPriceMax;
+    });
+
+    // 정렬
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'latest':
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
+        case 'price_asc':
+          return a.price - b.price;
+        case 'price_desc':
+          return b.price - a.price;
+        case 'rating':
+          return b.rating - a.rating;
+        case 'recommended':
+        default:
+          return b.rating * b.reviewCount - a.rating * a.reviewCount; // 평점 × 리뷰수
+      }
+    });
+
+    return filtered;
+  }, [searchTerm, selectedCategory, selectedLocation, sortBy, priceRange]);
+
+  // 필터 초기화
+  const resetFilters = () => {
+    setSearchTerm('');
+    setSelectedCategory('');
+    setSelectedLocation('');
+    setSortBy('recommended');
+    setPriceRange({ min: '', max: '' });
+  };
+
+  // 활성화된 필터 개수
+  const activeFiltersCount = [searchTerm, selectedCategory, selectedLocation, priceRange.min, priceRange.max]
+    .filter(filter => filter !== '').length;
+
   return (
     <div className="min-h-screen bg-white">
       {/* 헤더 섹션 */}
@@ -110,15 +191,17 @@ export default function ExperiencePage() {
 
       <Section className="py-12">
         <div className="max-w-7xl mx-auto px-4">
-          {/* 검색 및 필터 개선 */}
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-12">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* 검색 및 필터 */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
               <div>
                 <Label htmlFor="search" className="text-gray-700 font-semibold mb-2 block">
                   🔍 검색
                 </Label>
                 <Input
                   id="search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="체험명, 지역, 키워드 검색"
                   className="border-2 border-gray-200 focus:border-blue-500 rounded-xl"
                 />
@@ -129,6 +212,8 @@ export default function ExperiencePage() {
                 </Label>
                 <select
                   id="category"
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
                   className="w-full h-11 px-4 border-2 border-gray-200 rounded-xl text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
                 >
                   <option value="">전체</option>
@@ -143,6 +228,8 @@ export default function ExperiencePage() {
                 </Label>
                 <select
                   id="location"
+                  value={selectedLocation}
+                  onChange={(e) => setSelectedLocation(e.target.value)}
                   className="w-full h-11 px-4 border-2 border-gray-200 rounded-xl text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
                 >
                   <option value="">전체</option>
@@ -154,43 +241,109 @@ export default function ExperiencePage() {
                   <option value="충청북도">충청북도</option>
                 </select>
               </div>
-              <div className="flex items-end">
-                <Button className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-semibold">
-                  검색하기
-                </Button>
+              <div>
+                <Label className="text-gray-700 font-semibold mb-2 block">
+                  💰 가격 범위
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    type="number"
+                    value={priceRange.min}
+                    onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
+                    placeholder="최소"
+                    className="border-2 border-gray-200 focus:border-blue-500 rounded-xl text-xs"
+                  />
+                  <Input
+                    type="number"
+                    value={priceRange.max}
+                    onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
+                    placeholder="최대"
+                    className="border-2 border-gray-200 focus:border-blue-500 rounded-xl text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 필터 상태 및 초기화 */}
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                {activeFiltersCount > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600">
+                      {activeFiltersCount}개 필터 적용됨
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={resetFilters}
+                      className="text-xs px-3 py-1 h-7"
+                    >
+                      🔄 초기화
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
           {/* 정렬 및 결과 수 */}
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div className="text-gray-600">
-              총 <span className="font-bold text-gray-900">{mockExperiences.length}개</span>의 체험
+              총 <span className="font-bold text-gray-900">{filteredAndSortedExperiences.length}개</span>의 체험
+              {filteredAndSortedExperiences.length !== mockExperiences.length && (
+                <span className="text-blue-600 ml-2">
+                  (전체 {mockExperiences.length}개 중)
+                </span>
+              )}
             </div>
-            <div className="flex items-center space-x-4">
-              <select className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-500">
-                <option>추천순</option>
-                <option>최신순</option>
-                <option>가격 낮은순</option>
-                <option>가격 높은순</option>
-                <option>평점순</option>
+            <div className="flex items-center gap-4">
+              <Label htmlFor="sort" className="text-sm text-gray-600 whitespace-nowrap">
+                정렬:
+              </Label>
+              <select 
+                id="sort"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+              >
+                {sortOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
 
           {/* 체험 목록 그리드 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {mockExperiences.map((experience) => (
-              <ExperienceCard key={experience.id} experience={experience} />
-            ))}
-          </div>
+          {filteredAndSortedExperiences.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredAndSortedExperiences.map((experience) => (
+                <ExperienceCard key={experience.id} experience={experience} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <div className="text-6xl mb-4">🔍</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">검색 결과가 없습니다</h3>
+              <p className="text-gray-600 mb-6">다른 검색어나 필터를 시도해보세요</p>
+              <Button 
+                onClick={resetFilters}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3"
+              >
+                모든 필터 초기화
+              </Button>
+            </div>
+          )}
 
-          {/* 더보기 버튼 */}
-          <div className="text-center mt-16">
-            <Button variant="outline" size="lg" className="px-12 py-4 text-blue-600 border-2 border-blue-600 hover:bg-blue-50">
-              더 많은 체험 보기
-            </Button>
-          </div>
+          {/* 더보기 버튼 (결과가 있을 때만) */}
+          {filteredAndSortedExperiences.length > 0 && (
+            <div className="text-center mt-16">
+              <Button variant="outline" size="lg" className="px-12 py-4 text-blue-600 border-2 border-blue-600 hover:bg-blue-50">
+                더 많은 체험 보기
+              </Button>
+            </div>
+          )}
         </div>
       </Section>
     </div>

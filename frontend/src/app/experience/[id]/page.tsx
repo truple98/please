@@ -1,7 +1,10 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Section } from '@/components/ui/Section';
 import { Card } from '@/components/ui/Card';
+import { Modal } from '@/components/ui/Modal';
 
 // Mock 데이터 (실제로는 API에서 가져올 예정)
 const mockExperience = {
@@ -10,6 +13,13 @@ const mockExperience = {
   description: "흙을 만지며 마음을 정리하는 체험입니다. 전문 도예가의 지도 아래 직접 흙을 빚어 아름다운 도자기를 만들어보세요. 도자기 제작의 모든 과정을 체험할 수 있으며, 완성된 작품은 약 2주 후 택배로 받으실 수 있습니다.",
   location: "경기도 여주",
   imageUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+  images: [
+    "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1594736797933-d0a501ba0348?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1571115764595-644a1f56a55c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
+  ],
   category: "🎨 공방",
   price: 50000,
   originalPrice: 65000,
@@ -83,6 +93,38 @@ const mockExperience = {
 };
 
 export default function ExperienceDetailPage({ params }: { params: { id: string } }) {
+  // 모달 상태 관리
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [selectedParticipants, setSelectedParticipants] = useState(1);
+  const [selectedDate, setSelectedDate] = useState(mockExperience.date);
+
+  // 이미지 갤러리 모달 열기
+  const openImageModal = (index: number = 0) => {
+    setCurrentImageIndex(index);
+    setIsImageModalOpen(true);
+  };
+
+  // 이미지 네비게이션
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % mockExperience.images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + mockExperience.images.length) % mockExperience.images.length);
+  };
+
+  // 예약 처리
+  const handleBooking = () => {
+    // 실제로는 API 호출
+    alert(`예약이 완료되었습니다!\n\n📅 날짜: ${selectedDate}\n👥 인원: ${selectedParticipants}명\n💰 총 금액: ${(mockExperience.price * selectedParticipants).toLocaleString()}원`);
+    setIsBookingModalOpen(false);
+  };
+
+  const totalPrice = mockExperience.price * selectedParticipants;
+  const discountAmount = (mockExperience.originalPrice - mockExperience.price) * selectedParticipants;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       {/* 뒤로가기 버튼 */}
@@ -104,13 +146,17 @@ export default function ExperienceDetailPage({ params }: { params: { id: string 
                 <img
                   src={mockExperience.imageUrl}
                   alt={mockExperience.title}
-                  className="w-full h-64 lg:h-96 object-cover"
+                  className="w-full h-64 lg:h-96 object-cover cursor-pointer hover:brightness-110 transition-all"
+                  onClick={() => openImageModal(0)}
                 />
                 <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium">
                   {mockExperience.category}
                 </div>
-                <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
-                  📸 1/5
+                <div 
+                  className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-black/70 transition-all"
+                  onClick={() => openImageModal(0)}
+                >
+                  📸 1/{mockExperience.images.length}
                 </div>
               </div>
 
@@ -154,7 +200,11 @@ export default function ExperienceDetailPage({ params }: { params: { id: string 
                       23% 할인
                     </span>
                   </div>
-                  <Button size="lg" className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-blue-600 hover:to-primary transform hover:scale-[1.02] transition-all duration-200">
+                  <Button 
+                    size="lg" 
+                    className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-blue-600 hover:to-primary transform hover:scale-[1.02] transition-all duration-200"
+                    onClick={() => setIsBookingModalOpen(true)}
+                  >
                     💳 지금 예약하기
                   </Button>
                   <p className="text-sm text-gray-500 text-center mt-2">즉시 확정 • 무료 취소 가능</p>
@@ -350,6 +400,168 @@ export default function ExperienceDetailPage({ params }: { params: { id: string 
           </div>
         </div>
       </Section>
+
+      {/* 이미지 갤러리 모달 */}
+      <Modal
+        open={isImageModalOpen}
+        onClose={() => setIsImageModalOpen(false)}
+        className="max-w-4xl w-full max-h-[90vh] h-auto p-0"
+      >
+        <div className="relative w-full h-[60vh] bg-gray-900 rounded-lg overflow-hidden">
+          <img
+            src={mockExperience.images[currentImageIndex]}
+            alt={mockExperience.title}
+            className="w-full h-full object-contain"
+          />
+          
+          {/* 네비게이션 버튼 */}
+          <button
+            onClick={prevImage}
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-all"
+          >
+            ←
+          </button>
+          <button
+            onClick={nextImage}
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-all"
+          >
+            →
+          </button>
+          
+          {/* 이미지 카운터 */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
+            {currentImageIndex + 1} / {mockExperience.images.length}
+          </div>
+          
+          {/* 썸네일 */}
+          <div className="absolute bottom-4 left-4 flex gap-2">
+            {mockExperience.images.map((img, index) => (
+              <img
+                key={index}
+                src={img}
+                alt={`썸네일 ${index + 1}`}
+                className={`w-12 h-12 object-cover rounded cursor-pointer transition-all ${
+                  index === currentImageIndex 
+                    ? 'ring-2 ring-white opacity-100' 
+                    : 'opacity-60 hover:opacity-80'
+                }`}
+                onClick={() => setCurrentImageIndex(index)}
+              />
+            ))}
+          </div>
+        </div>
+      </Modal>
+
+      {/* 예약 확인 모달 */}
+      <Modal
+        open={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
+        className="max-w-md w-full"
+      >
+        <div className="p-6 space-y-6">
+          {/* 헤더 */}
+          <div className="text-center border-b pb-4">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">예약 확인</h2>
+            <p className="text-gray-600">{mockExperience.title}</p>
+          </div>
+
+          {/* 체험 정보 요약 */}
+          <div className="bg-blue-50 rounded-lg p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <img
+                src={mockExperience.imageUrl}
+                alt={mockExperience.title}
+                className="w-16 h-16 object-cover rounded-lg"
+              />
+              <div>
+                <h3 className="font-semibold">{mockExperience.title}</h3>
+                <p className="text-sm text-gray-600">📍 {mockExperience.location}</p>
+                <p className="text-sm text-gray-600">⏰ {mockExperience.duration}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* 예약 옵션 */}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                📅 체험 날짜
+              </label>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                👥 참여 인원
+              </label>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setSelectedParticipants(Math.max(1, selectedParticipants - 1))}
+                  className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center font-bold transition-all"
+                >
+                  -
+                </button>
+                <span className="text-xl font-bold min-w-[40px] text-center">
+                  {selectedParticipants}
+                </span>
+                <button
+                  onClick={() => setSelectedParticipants(Math.min(mockExperience.maxParticipants, selectedParticipants + 1))}
+                  className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center font-bold transition-all"
+                >
+                  +
+                </button>
+                <span className="text-sm text-gray-500 ml-2">
+                  (최대 {mockExperience.maxParticipants}명)
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* 가격 요약 */}
+          <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+            <div className="flex justify-between">
+              <span>기본 가격</span>
+              <span>{(mockExperience.originalPrice * selectedParticipants).toLocaleString()}원</span>
+            </div>
+            <div className="flex justify-between text-red-600">
+              <span>할인 금액</span>
+              <span>-{discountAmount.toLocaleString()}원</span>
+            </div>
+            <div className="border-t pt-2 flex justify-between text-lg font-bold">
+              <span>총 결제 금액</span>
+              <span className="text-blue-600">{totalPrice.toLocaleString()}원</span>
+            </div>
+          </div>
+
+          {/* 버튼 */}
+          <div className="space-y-3">
+            <Button
+              size="lg"
+              className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-blue-600 hover:to-primary transform hover:scale-[1.02] transition-all duration-200 h-12"
+              onClick={handleBooking}
+            >
+              💳 {totalPrice.toLocaleString()}원 결제하기
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="w-full h-12"
+              onClick={() => setIsBookingModalOpen(false)}
+            >
+              취소
+            </Button>
+          </div>
+          
+          <p className="text-xs text-gray-500 text-center">
+            예약 확정 후 24시간 이내 무료 취소 가능
+          </p>
+        </div>
+      </Modal>
     </div>
   );
 } 
