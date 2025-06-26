@@ -1,0 +1,21 @@
+{
+  "users": [
+    {
+      "id": "user001",
+      "name": "김진호",
+      "age": 32,
+      "location": "서울특별시",
+      "job": "프론트엔드 개발자",
+      "preferenceTags": ["혼자", "힐링", "조용함"],
+      "favorites": ["exp001", "exp002"],
+      "reviews": [
+        {
+          "experienceId": "exp001",
+          "rating": 5,
+          "comment": "정말 뜻깊은 시간이었어요. 나만의 의자를 직접 만들었어요!",
+          "date": "2025-01-15"
+        }
+      ]
+    }
+  ]
+} 

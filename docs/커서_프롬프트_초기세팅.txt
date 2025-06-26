@@ -1,0 +1,199 @@
+📁 파일명: cursor-prompt-initial-setup.txt
+🕒 생성일: 2025-01-27
+🔄 업데이트: Next.js 14 App Router 기반으로 전면 수정
+
+────────────────────────────────────────────
+🎯 프로젝트 초기 학습용 프롬프트 (Cursor AI 입력용)
+────────────────────────────────────────────
+
+1️⃣ 프로젝트 개요 입력
+
+```
+이 프로젝트는 "도시밖 지방 체험"이라는 이름의 지역 체험 큐레이션 웹 플랫폼입니다.
+도시 청년들이 일상에서 벗어나 지방의 공방, 농장, 축제 등 체험을 탐색하고,
+AI 챗봇의 추천을 통해 자신에게 맞는 체험을 발견할 수 있도록 돕는 것이 목적입니다.
+
+기존 정부 체험 프로그램의 한계를 넘어서고, 
+지속 가능한 관계 흐름 + AI 개인화 큐레이션 + 사용자 기반 추천 시스템을 제공합니다.
+
+기술 스택: Next.js 14 (App Router) + TypeScript + Tailwind CSS + OpenAI API
+```
+
+2️⃣ 개발 방식 및 명령 전달 규칙 입력
+
+```
+이 프로젝트는 바이브 코딩 방식으로 진행됩니다.
+사용자는 직접 코드를 작성하지 않고, Cursor AI에게 한국어로 명확한 프롬프트를 입력하여 코드 생성을 유도합니다.
+
+지시는 아래와 같은 원칙을 따릅니다:
+- 작업은 항상 세분화하여 단계별로 전달
+- 파일 구조, 코드 목적, 데이터 흐름 등을 명확히 설명
+- 구조 설계 → 기능 구현 → 스타일링 순서로 진행
+- Next.js App Router의 파일 기반 라우팅 구조를 준수
+```
+
+3️⃣ Next.js 기술 스택 및 폴더 구조 안내
+
+```
+기술 스택은 다음과 같습니다:
+
+프론트엔드: Next.js 14 (App Router) + TypeScript + Tailwind CSS
+백엔드: Next.js API Routes (서버리스 함수)
+외부 API: OpenAI API (GPT-4-turbo)
+데이터 저장: 초기에는 mock 폴더의 JSON 기반 더미 데이터
+상태 관리: Zustand 또는 React Context API
+
+폴더 구조 (Next.js App Router 기준):
+- app/                    # Next.js App Router 메인 디렉토리
+  ├── page.tsx           # 홈페이지 (/)
+  ├── layout.tsx         # 루트 레이아웃
+  ├── globals.css        # 전역 스타일
+  ├── chatbot/           # 챗봇 페이지 (/chatbot)
+  ├── experience/        # 체험 관련 페이지 (/experience)
+  ├── mypage/            # 마이페이지 (/mypage)
+  └── api/               # Next.js API Routes
+- components/            # 재사용 가능한 컴포넌트
+- lib/                   # 유틸리티 및 설정
+- public/                # 정적 파일
+- mock/                  # 더미 데이터 JSON 파일들
+- docs/                  # 프로젝트 문서들
+```
+
+4️⃣ Next.js 파일 기반 라우팅 구조 설명
+
+```
+Next.js App Router의 파일 기반 라우팅 구조:
+
+1. 페이지 라우팅:
+   - app/page.tsx → 홈페이지 (/)
+   - app/chatbot/page.tsx → 챗봇 페이지 (/chatbot)
+   - app/experience/page.tsx → 체험 목록 (/experience)
+   - app/experience/[id]/page.tsx → 체험 상세 (/experience/[id])
+   - app/mypage/page.tsx → 마이페이지 (/mypage)
+
+2. API 라우팅:
+   - app/api/chat/route.ts → POST /api/chat
+   - app/api/experiences/route.ts → GET /api/experiences
+   - app/api/experiences/[id]/route.ts → GET /api/experiences/[id]
+   - app/api/favorites/route.ts → POST /api/favorites
+   - app/api/reviews/route.ts → GET, POST /api/reviews
+
+3. 특수 파일:
+   - app/layout.tsx → 루트 레이아웃 (모든 페이지에 적용)
+   - app/loading.tsx → 로딩 상태
+   - app/error.tsx → 에러 페이지
+   - app/not-found.tsx → 404 페이지
+```
+
+5️⃣ 챗봇 기능 및 OpenAI API 연동 설명
+
+```
+챗봇 기능은 다음과 같이 구현됩니다:
+
+1. 챗봇 인터페이스 위치: app/chatbot/page.tsx
+2. API 엔드포인트: app/api/chat/route.ts
+3. OpenAI API 연동: lib/api/openai.ts
+
+챗봇 대화 흐름:
+- 사용자 입력 → 챗봇 컴포넌트
+- API 호출 → /api/chat (OpenAI GPT API 연동)
+- 응답 처리 → 추천 결과 생성
+- UI 업데이트 → 체험 카드 표시
+
+OpenAI API 설정:
+- 환경 변수: OPENAI_API_KEY
+- 모델: gpt-4-turbo-preview
+- 시스템 프롬프트: 체험 큐레이터 역할 정의
+- 사용자 메시지: 성향 분석 및 추천 요청
+```
+
+6️⃣ 데이터 흐름 및 상태 관리
+
+```
+데이터 흐름:
+1. 더미 데이터 (mock/*.json) → API Routes → 컴포넌트
+2. 사용자 입력 → 챗봇 API → OpenAI API → 추천 결과
+3. 상태 관리: Zustand 스토어 또는 React Context
+
+주요 데이터 파일:
+- mock/experiences.json: 체험 데이터
+- mock/users.json: 사용자 데이터
+- mock/recommendations.json: 추천 데이터
+- mock/reviews.json: 후기 데이터
+
+상태 관리 구조:
+- lib/store/chatStore.ts: 챗봇 상태
+- lib/store/userStore.ts: 사용자 상태
+- lib/store/experienceStore.ts: 체험 상태
+```
+
+7️⃣ Cursor 개발 기록 문서 자동화 명령
+
+```
+아래 명령으로 /docs 폴더 내부에 개발 기록 템플릿 문서를 생성해주세요:
+
+- progress-checklist.md:
+  구현해야 할 기능 목록을 체크박스 형식으로 정리하고, 완료시 [x] 로 체크할 수 있도록 설정합니다.
+
+- debug-log.md:
+  디버깅 과정에서 발생한 오류, 원인, 해결 방법을 날짜와 함께 기록합니다.
+
+- change-log.md:
+  체크리스트 항목 중 기능 스펙이 변경되거나 삭제된 경우 그 사유와 함께 수정 내역을 기록합니다.
+
+- dev-diary.md:
+  매일 커밋 또는 개발 종료 시점에 그날의 작업 요약, 변경 사항, 메모 등을 자유롭게 기술합니다.
+```
+
+💡 각 파일은 docs/ 내부에 생성되며 Markdown(.md) 포맷을 따릅니다.
+
+8️⃣ 이후 개발 시 예시 프롬프트
+
+```
+"hp 폴더 내에 Next.js App Router 기반 디렉토리 구조를 생성해 주세요"
+
+"Next.js 프로젝트를 초기화하고 TypeScript, Tailwind CSS를 설정해 주세요"
+
+"app/api/chat/route.ts 파일을 생성하고 OpenAI API 연동 코드를 작성해 주세요"
+
+"components/chatbot/ChatInterface.tsx 컴포넌트를 생성하고 챗봇 UI를 구현해 주세요"
+
+"mock 폴더에 experiences.json, users.json, recommendations.json을 생성하고 기본 구조를 채워주세요"
+
+"docs/progress-checklist.md에 '챗봇 인터페이스 구현' 항목을 추가하고, 미완료 상태로 두세요"
+
+"app/chatbot/page.tsx 페이지를 생성하고 챗봇 메인 화면을 구현해 주세요"
+
+"lib/store/chatStore.ts Zustand 스토어를 생성하고 챗봇 상태 관리를 구현해 주세요"
+```
+
+9️⃣ Next.js 특화 개발 가이드라인
+
+```
+Next.js 개발 시 주의사항:
+
+1. 서버 컴포넌트 vs 클라이언트 컴포넌트:
+   - 기본적으로 서버 컴포넌트 사용
+   - 상태 관리나 이벤트 핸들러가 필요한 경우 'use client' 지시어 사용
+
+2. API Routes:
+   - app/api/ 디렉토리 내에 route.ts 파일로 구현
+   - GET, POST, PUT, DELETE 메서드 지원
+   - NextRequest, NextResponse 사용
+
+3. 이미지 최적화:
+   - next/image 컴포넌트 사용
+   - 자동 이미지 최적화 및 지연 로딩
+
+4. 환경 변수:
+   - .env.local 파일에 민감한 정보 저장
+   - NEXT_PUBLIC_ 접두사로 클라이언트에서 접근 가능한 변수 지정
+
+5. 성능 최적화:
+   - 자동 코드 분할
+   - 정적 생성 (SSG) 활용
+   - 서버 사이드 렌더링 (SSR) 활용
+```
+
+📌 이 파일은 Cursor에게 먼저 입력해 전체 프로젝트 흐름을 학습시키는 용도입니다.
+Next.js App Router 기반의 현대적인 웹 애플리케이션 개발을 위한 가이드라인을 제공합니다.

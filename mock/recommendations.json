@@ -1,0 +1,18 @@
+{
+  "recommendations": [
+    {
+      "userId": "user001",
+      "experienceId": "exp001",
+      "reason": "혼자 조용히 집중할 수 있는 작업형 체험을 선호합니다.",
+      "score": 0.95,
+      "date": "2025-01-27"
+    },
+    {
+      "userId": "user001",
+      "experienceId": "exp002",
+      "reason": "손으로 직접 만드는 창작 활동에 관심이 있습니다.",
+      "score": 0.88,
+      "date": "2025-01-27"
+    }
+  ]
+} 

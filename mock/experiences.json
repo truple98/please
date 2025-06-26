@@ -1,0 +1,43 @@
+{
+  "experiences": [
+    {
+      "id": "exp001",
+      "title": "도자기 만들기 클래스",
+      "location": "경기도 여주",
+      "description": "흙을 만지며 마음을 정리하는 체험",
+      "tags": ["혼자", "힐링", "자연", "조용함"],
+      "image": "/images/pottery.jpg",
+      "price": "50,000원",
+      "duration": "3시간",
+      "maxParticipants": 8,
+      "difficulty": "초급",
+      "category": "공방"
+    },
+    {
+      "id": "exp002",
+      "title": "조용한 시골 공방의 목공 체험",
+      "location": "강원도 평창",
+      "description": "직접 손으로 무언가를 만드는 경험",
+      "tags": ["혼자", "힐링", "조용함", "창작"],
+      "image": "/images/woodworking.jpg",
+      "price": "80,000원",
+      "duration": "4시간",
+      "maxParticipants": 6,
+      "difficulty": "중급",
+      "category": "공방"
+    },
+    {
+      "id": "exp003",
+      "title": "친환경 농장 체험",
+      "location": "충청남도 논산",
+      "description": "자연과 함께하는 농작물 수확 체험",
+      "tags": ["함께", "자연", "활동적", "교육"],
+      "image": "/images/farm.jpg",
+      "price": "30,000원",
+      "duration": "2시간",
+      "maxParticipants": 15,
+      "difficulty": "초급",
+      "category": "농장"
+    }
+  ]
+} 
